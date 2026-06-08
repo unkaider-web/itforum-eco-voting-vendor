@@ -84,11 +84,18 @@
             font-family: inherit;
             margin: 0 auto;
             display: block;
+            appearance: textfield;
+            -moz-appearance: textfield;
         }
         .score-input:focus {
             outline: none;
             border-color: #00bcd4;
             box-shadow: 0 0 0 2px rgba(0,188,212,0.2);
+        }
+        .score-input::-webkit-outer-spin-button,
+        .score-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         .total-row { background: #f8fafc; }
         .total-row td { font-weight: 700; font-size: 18px; color: #0d4a82; }
@@ -200,8 +207,11 @@
             .rating-table th, .rating-table td { padding: 10px 8px; }
             .score-input { width: 70px; }
             .radio-label { display: block; margin-bottom: 10px; }
-            .actions { flex-direction: column; }
-            .btn { width: 100%; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; justify-content: center; }
+            .btn-danger { order: 3; }
+            .btn-secondary { order: 2; }
+            .btn-primary { order: 1; }
         }
     </style>
 </head>
@@ -239,14 +249,52 @@
             </div>
 
             <table class="rating-table">
-                <thead><tr><th>Критерий</th><th>Оценка (1–5)</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Критерий</th>
+                        <th>Оценка (1–5)</th>
+                    </tr>
+                </thead>
                 <tbody>
-                    <tr><td><div class="criterion-name">1. Точность решения</div><div class="criterion-desc">способность обнаруживать аномалии на данных Югры</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
-                    <tr><td><div class="criterion-name">2. Скорость обработки</div><div class="criterion-desc">время от загрузки данных до результата</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
-                    <tr><td><div class="criterion-name">3. Экономический эффект</div><div class="criterion-desc">ROI, срок окупаемости, снижение затрат</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
-                    <tr><td><div class="criterion-name">4. Интегрируемость</div><div class="criterion-desc">возможность встраивания в существующие системы</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
-                    <tr><td><div class="criterion-name">5. Масштабируемость</div><div class="criterion-desc">применимость к другим задачам и территориям</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
-                    <tr class="total-row"><td><strong>СУММА БАЛЛОВ</strong> (max 25)</td><td class="total-score" id="totalScore">15</td></tr>
+                    <tr>
+                        <td>
+                            <div class="criterion-name">1. Точность решения</div>
+                            <div class="criterion-desc">способность обнаруживать аномалии на данных Югры</div>
+                        </td>
+                        <td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterion-name">2. Скорость обработки</div>
+                            <div class="criterion-desc">время от загрузки данных до результата</div>
+                        </td>
+                        <td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterion-name">3. Экономический эффект</div>
+                            <div class="criterion-desc">ROI, срок окупаемости, снижение затрат</div>
+                        </td>
+                        <td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterion-name">4. Интегрируемость</div>
+                            <div class="criterion-desc">возможность встраивания в существующие системы</div>
+                        </td>
+                        <td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterion-name">5. Масштабируемость</div>
+                            <div class="criterion-desc">применимость к другим задачам и территориям</div>
+                        </td>
+                        <td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td><strong>СУММА БАЛЛОВ</strong> (max 25)</td>
+                        <td class="total-score" id="totalScore">15</td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -343,7 +391,7 @@
             let val = parseInt(inp.value, 10);
             if (isNaN(val)) val = 1;
             val = Math.min(5, Math.max(1, val));
-            inp.value = val;
+            if (inp.value != val) inp.value = val;
             total += val;
         });
         totalSpan.innerText = total;
@@ -400,15 +448,22 @@
 
         setLoading(true);
         try {
-            await fetch(GOOGLE_SCRIPT_URL, {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: 'cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            addVotedVendor(vendor);
-            showToast(`Оценка для "${vendor}" отправлена! Спасибо.`);
-            resetForm();
+            
+            if (response.ok) {
+                addVotedVendor(vendor);
+                showToast(`Оценка для "${vendor}" отправлена! Спасибо.`);
+                resetForm();
+            } else {
+                const errorText = await response.text();
+                console.error('Server error:', errorText);
+                showToast('Ошибка при отправке. Попробуйте ещё раз.', true);
+            }
         } catch (error) {
             console.error('Ошибка:', error);
             showToast('Ошибка отправки. Проверьте подключение.', true);
