@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Оценочный лист вендора | Биржа решений 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #eef2f5;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #0d4a82, #1a6fb0);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 20px 20px 0 0;
+        }
+        .header h1 { font-size: 26px; margin-bottom: 8px; }
+        .header p { opacity: 0.9; font-size: 14px; }
+        .vendor-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .vendor-header {
+            background: #f8fafc;
+            padding: 16px 28px;
+            border-bottom: 2px solid #00bcd4;
+        }
+        .vendor-body { padding: 24px 28px; }
+        .vendor-select-block { margin-bottom: 24px; }
+        .vendor-select-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0d4a82;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .vendor-select {
+            width: 100%;
+            font-size: 14px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .rating-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+        .rating-table th, .rating-table td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .rating-table th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: #0d4a82;
+            font-size: 15px;
+        }
+        .rating-table td:first-child { width: 70%; }
+        .rating-table td:last-child { width: 30%; text-align: center; }
+        .criterion-name { font-weight: 500; color: #1e2a3a; }
+        .criterion-desc { font-size: 12px; color: #5a6e7c; margin-top: 4px; }
+        .score-input {
+            width: 80px;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-family: inherit;
+            margin: 0 auto;
+            display: block;
+        }
+        .score-input:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 2px rgba(0,188,212,0.2);
+        }
+        .total-row { background: #f8fafc; }
+        .total-row td { font-weight: 700; font-size: 18px; color: #0d4a82; }
+        .total-score { font-size: 24px; font-weight: 800; color: #0d4a82; text-align: center; }
+        .radio-group {
+            margin: 20px 0 16px;
+            padding: 16px 0;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-right: 32px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #1e2a3a;
+        }
+        .radio-label input { width: 18px; height: 18px; cursor: pointer; }
+        .comment-section { margin-top: 20px; }
+        .comment-label {
+            font-weight: 600;
+            color: #0d4a82;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .comment-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            font-size: 14px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .btn-primary { background: #0d4a82; color: white; }
+        .btn-primary:hover { background: #063a62; }
+        .btn-primary:disabled { background: #9e9e9e; cursor: not-allowed; }
+        .btn-secondary { background: white; border: 1px solid #cbd5e1; color: #1e2a3a; }
+        .btn-secondary:hover { background: #f1f5f9; }
+        .btn-danger { background: #c62828; color: white; }
+        .btn-danger:hover { background: #8e1e1e; }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            padding: 16px;
+            background: #e6eef5;
+            border-radius: 20px;
+            color: #2c5a7a;
+            font-size: 13px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e7d32;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.error { background: #c62828; }
+        @media (max-width: 700px) {
+            .rating-table th, .rating-table td { padding: 10px 8px; }
+            .score-input { width: 70px; }
+            .radio-label { display: block; margin-bottom: 10px; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📋 Оценочный лист вендора</h1>
+        <p>Экспертная сессия «Применение ДЗЗ, БАС и ИИ в природоохранной деятельности»<br>Биржа решений — 18 июня 2026, Ханты-Мансийск</p>
+    </div>
+
+    <div class="vendor-card">
+        <div class="vendor-header">
+            <span class="vendor-title" style="font-size: 20px; font-weight: 700; color: #0d4a82;">Оценка решения</span>
+        </div>
+        <div class="vendor-body">
+            <div class="vendor-select-block">
+                <div class="vendor-select-label">ВЫБОР ВЕНДОРА</div>
+                <select id="vendorSelect" class="vendor-select" required>
+                    <option value="" disabled selected>-- Выберите компанию --</option>
+                    <option value="АО «НПП «Радар ММС»">АО «НПП «Радар ММС»</option>
+                    <option value="ООО «Лоретт»">ООО «Лоретт»</option>
+                    <option value="АУ «Югорский НИИ информационных технологий»">АУ «Югорский НИИ информационных технологий»</option>
+                    <option value="ООО «БАС»">ООО «БАС»</option>
+                    <option value="АО «Российские космические системы»">АО «Российские космические системы»</option>
+                    <option value="АО «Т1»">АО «Т1»</option>
+                    <option value="ФГБОУ ВО «Югорский государственный университет»">ФГБОУ ВО «Югорский государственный университет»</option>
+                    <option value="ЮНИИ ИТ">ЮНИИ ИТ</option>
+                    <option value="ГК «Геоскан»">ГК «Геоскан»</option>
+                    <option value="АО «Терра Тех»">АО «Терра Тех»</option>
+                    <option value="ООО «Нейроникс»">ООО «Нейроникс»</option>
+                    <option value="ООО «Центр пространственных данных и технологий»">ООО «Центр пространственных данных и технологий»</option>
+                    <option value="ПРАЙМ ГРУПП">ПРАЙМ ГРУПП</option>
+                    <option value="ООО «Оператор инфраструктуры БАС»">ООО «Оператор инфраструктуры БАС»</option>
+                </select>
+            </div>
+
+            <table class="rating-table">
+                <thead><tr><th>Критерий</th><th>Оценка (1–5)</th></tr></thead>
+                <tbody>
+                    <tr><td><div class="criterion-name">1. Точность решения</div><div class="criterion-desc">способность обнаруживать аномалии на данных Югры</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
+                    <tr><td><div class="criterion-name">2. Скорость обработки</div><div class="criterion-desc">время от загрузки данных до результата</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
+                    <tr><td><div class="criterion-name">3. Экономический эффект</div><div class="criterion-desc">ROI, срок окупаемости, снижение затрат</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
+                    <tr><td><div class="criterion-name">4. Интегрируемость</div><div class="criterion-desc">возможность встраивания в существующие системы</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
+                    <tr><td><div class="criterion-name">5. Масштабируемость</div><div class="criterion-desc">применимость к другим задачам и территориям</div></td><td><input type="number" class="score-input" min="1" max="5" step="1" value="3"></td></tr>
+                    <tr class="total-row"><td><strong>СУММА БАЛЛОВ</strong> (max 25)</td><td class="total-score" id="totalScore">15</td></tr>
+                </tbody>
+            </table>
+
+            <div class="radio-group">
+                <span style="font-weight: 600; margin-right: 24px;">Заинтересовало для дальнейшего рассмотрения?</span>
+                <label class="radio-label"><input type="radio" name="interest" value="Да"> Да</label>
+                <label class="radio-label"><input type="radio" name="interest" value="Нет" checked> Нет</label>
+            </div>
+
+            <div class="comment-section">
+                <label class="comment-label">Комментарий / пожелание</label>
+                <textarea id="comment" class="comment-input" placeholder="Введите комментарий..."></textarea>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-danger" id="resetHistoryBtn">Сбросить историю голосований</button>
+                <button class="btn btn-secondary" id="resetBtn">Сбросить форму</button>
+                <button class="btn btn-primary" id="submitBtn">
+                    <span id="submitText">Отправить оценку</span>
+                    <span id="submitSpinner" style="display: none;" class="spinner"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="footer-note">
+        📌 Шкала оценок: 5 — Отлично | 4 — Хорошо | 3 — Удовлетворительно | 2 — Плохо | 1 — Не оценивал
+    </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2QVmWb5BGAAkfp_xaA6ZC6SK7PuKLv2i5eGc2J03ftOLOFBTve8zRH0S5M5C9ZKl14Q/exec';
+
+    const scoreInputs = document.querySelectorAll('.score-input');
+    const totalSpan = document.getElementById('totalScore');
+    const resetBtn = document.getElementById('resetBtn');
+    const resetHistoryBtn = document.getElementById('resetHistoryBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    const vendorSelect = document.getElementById('vendorSelect');
+    const commentInput = document.getElementById('comment');
+    const interestRadios = document.querySelectorAll('input[name="interest"]');
+
+    let isSubmitting = false;
+    const VOTED_KEY = 'votedVendors';
+
+    function loadVotedVendors() {
+        const stored = localStorage.getItem(VOTED_KEY);
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    function saveVotedVendors(voted) {
+        localStorage.setItem(VOTED_KEY, JSON.stringify(voted));
+    }
+
+    function updateVendorSelect() {
+        const voted = loadVotedVendors();
+        const options = vendorSelect.querySelectorAll('option[value]:not([value=""])');
+        options.forEach(opt => {
+            if (voted.includes(opt.value)) {
+                opt.disabled = true;
+                opt.style.color = '#9e9e9e';
+                opt.style.backgroundColor = '#f5f5f5';
+            } else {
+                opt.disabled = false;
+                opt.style.color = '';
+                opt.style.backgroundColor = '';
+            }
+        });
+        if (vendorSelect.selectedOptions[0]?.disabled) vendorSelect.value = '';
+    }
+
+    function addVotedVendor(vendorName) {
+        const voted = loadVotedVendors();
+        if (!voted.includes(vendorName)) {
+            voted.push(vendorName);
+            saveVotedVendors(voted);
+            updateVendorSelect();
+        }
+    }
+
+    function resetHistory() {
+        if (confirm('Сбросить историю голосований? Все компании снова станут доступны.')) {
+            localStorage.removeItem(VOTED_KEY);
+            updateVendorSelect();
+            showToast('История голосований сброшена');
+        }
+    }
+
+    function updateTotal() {
+        let total = 0;
+        scoreInputs.forEach(inp => {
+            let val = parseInt(inp.value, 10);
+            if (isNaN(val)) val = 1;
+            val = Math.min(5, Math.max(1, val));
+            inp.value = val;
+            total += val;
+        });
+        totalSpan.innerText = total;
+    }
+
+    function resetForm() {
+        scoreInputs.forEach(inp => inp.value = 3);
+        const noRadio = Array.from(interestRadios).find(r => r.value === 'Нет');
+        if (noRadio) noRadio.checked = true;
+        if (commentInput) commentInput.value = '';
+        vendorSelect.value = '';
+        updateTotal();
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.remove('error');
+        if (isError) toast.classList.add('error');
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+    }
+
+    function setLoading(loading) {
+        isSubmitting = loading;
+        submitBtn.disabled = loading;
+        if (loading) {
+            submitText.style.display = 'none';
+            submitSpinner.style.display = 'inline-block';
+        } else {
+            submitText.style.display = 'inline';
+            submitSpinner.style.display = 'none';
+        }
+    }
+
+    async function submitEvaluation() {
+        if (isSubmitting) return;
+        const vendor = vendorSelect.value;
+        if (!vendor) {
+            showToast('Выберите компанию из списка', true);
+            return;
+        }
+        if (loadVotedVendors().includes(vendor)) {
+            showToast(`Вы уже голосовали за "${vendor}"!`, true);
+            return;
+        }
+
+        const scores = Array.from(scoreInputs).map(inp => parseInt(inp.value, 10));
+        const total = parseInt(totalSpan.innerText, 10);
+        const interest = Array.from(interestRadios).find(r => r.checked)?.value || 'Нет';
+        const comment = commentInput?.value || '';
+
+        const payload = { vendor, scores, totalScore: total, interest, comment };
+
+        setLoading(true);
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            addVotedVendor(vendor);
+            showToast(`Оценка для "${vendor}" отправлена! Спасибо.`);
+            resetForm();
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showToast('Ошибка отправки. Проверьте подключение.', true);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    scoreInputs.forEach(inp => inp.addEventListener('input', updateTotal));
+    resetBtn.addEventListener('click', resetForm);
+    resetHistoryBtn.addEventListener('click', resetHistory);
+    submitBtn.addEventListener('click', submitEvaluation);
+    updateTotal();
+    updateVendorSelect();
+</script>
+</body>
+</html>
